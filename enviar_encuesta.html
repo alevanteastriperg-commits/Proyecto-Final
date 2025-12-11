@@ -5,21 +5,16 @@
   <title>Enviar Encuesta</title>
   <link rel="stylesheet" href="estilos.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
-    emailjs.init({
-      publicKey: "EvC3ct126HsxXo170"
-    });
+    emailjs.init("EvC3ct126HsxXo170"); 
   </script>
 </head>
-
 <body>
 
 <header>Enviar Encuesta – La Miguelina</header>
 
 <div class="container">
-
   <nav><a href="index.html">Inicio</a></nav>
 
   <div class="card">
@@ -47,21 +42,13 @@ let clientes = get(KEY_CLIENTES);
 document.getElementById("list").innerHTML =
   "<ul>" + clientes.map(c => `<li>${c.nombre} – ${c.email}</li>`).join("") + "</ul>";
 
-
 function generar(){
-
-  if(clientes.length === 0){
-    document.getElementById("msg").innerHTML = "❌ No hay clientes registrados.";
-    return;
-  }
-
   let linksHTML = "";
   let enviados = 0;
-  let errores = 0;
 
   clientes.forEach(c => {
 
-    let url = `votar.html?email=${encodeURIComponent(c.email)}`;
+    let url = `https://alevanteastriperg-commits.github.io/Proyecto-Final/votar.html?email=${encodeURIComponent(c.email)}`;
 
     linksHTML += `<p>${c.email} — <a href="${url}" target="_blank">Abrir</a></p>`;
 
@@ -72,16 +59,12 @@ function generar(){
     })
     .then(() => {
       enviados++;
-      document.getElementById("msg").innerHTML =
-        `✔ Correos enviados: ${enviados} / ${clientes.length}`;
+      document.getElementById("msg").innerHTML = "✔ Correos enviados: " + enviados;
     })
     .catch(err => {
-      errores++;
-      console.error("Error enviando a:", c.email, err);
-      document.getElementById("msg").innerHTML =
-        `⚠ Algunos correos fallaron (${errores}).`;
+      console.error(err);
+      document.getElementById("msg").innerHTML = "❌ Error enviando algunos correos.";
     });
-
   });
 
   document.getElementById("links").innerHTML = linksHTML;
