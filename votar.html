@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Votar - Encuesta La Miguelina</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header>Encuesta de Satisfacción – La Miguelina</header>
+
+<div class="container">
+  <div id="contenido" class="card"></div>
+</div>
+
+<script src="app.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const email = params.get("email");
+
+let chk = puedeVotar(email);
+
+if(!chk.ok){
+  document.getElementById("contenido").innerHTML = "❌ " + chk.msg;
+}else{
+  let preguntas = get(KEY_PREGUNTAS);
+  let html = `<h3>Encuesta para ${email}</h3>`;
+
+  preguntas.forEach(p=>{
+    html += `<h4>${p.titulo}</h4>`;
+    p.opciones.forEach(o=>{
+      html += `<label><input type="radio" name="p_${p.id}" value="${o.id}"> ${o.texto}</label><br>`;
+    });
+    html += "<br>";
+  });
+
+  html += `<button onclick="enviar()">Enviar Respuestas</button>`;
+  document.getElementById("contenido").innerHTML = html;
+}
+
+function enviar(){
+  let preguntas = get(KEY_PREGUNTAS);
+  let respuestas = {};
+
+  for(let p of preguntas){
+    let elegido = document.querySelector(`input[name='p_${p.id}']:checked`);
+    if(!elegido){
+      alert("Debe responder todas las preguntas");
+      return;
+    }
+    respuestas[p.id] = elegido.value;
+  }
+
+  guardarVoto(email, respuestas);
+  alert("✔ Gracias por participar");
+  location.href="resultados.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar Preguntas</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header>Registrar Preguntas – La Miguelina</header>
+
+<div class="container">
+  <nav>
+    <a href="index.html">Inicio</a>
+  </nav>
+
+  <div class="card">
+    <h3>Nueva Pregunta</h3>
+
+    <input type="hidden" id="edit_id">
+
+    <label>Título de la pregunta</label>
+    <input id="titulo" placeholder="Ej: ¿Qué tan satisfecho está con el servicio?">
+
+    <label>Opciones (una por línea)</label>
+    <textarea id="opciones" rows="6" placeholder="Muy satisfecho&#10;Satisfecho&#10;Neutral&#10;Insatisfecho"></textarea>
+
+    <button onclick="guardarPregunta()">Guardar</button>
+    <p id="msg"></p>
+  </div>
+
+  <div class="card">
+    <h3>Preguntas Registradas</h3>
+    <table class="table" id="tabla"></table>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+
+<script>
+function refrescarTabla(){
+  let preguntas = get(KEY_PREGUNTAS);
+  let html = `
+    <tr>
+      <th>ID</th>
+      <th>Pregunta</th>
+      <th>Opciones</th>
+      <th>Acciones</th>
+    </tr>
+  `;
+
+  preguntas.forEach(p => {
+    html += `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.titulo}</td>
+        <td>${p.opciones.map(o=>o.texto).join("<br>")}</td>
+        <td>
+          <button onclick="editar(${p.id})">Editar</button>
+          <button onclick="eliminar(${p.id})" style="background:#b83a3a">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("tabla").innerHTML = html;
+}
+
+function guardarPregunta(){
+  let idEditar = document.getElementById("edit_id").value;
+  let titulo = document.getElementById("titulo").value.trim();
+  let ops = document.getElementById("opciones").value.split("\n").map(o=>o.trim()).filter(o=>o);
+
+  if(!titulo){ 
+    document.getElementById("msg").innerHTML = "❌ El título no puede estar vacío"; 
+    return;
+  }
+
+  if(ops.length < 2){
+    document.getElementById("msg").innerHTML = "❌ Debes agregar al menos 2 opciones";
+    return;
+  }
+
+  let preguntas = get(KEY_PREGUNTAS);
+
+  // MODO EDITAR
+  if(idEditar){
+    let index = preguntas.findIndex(p => p.id == idEditar);
+    preguntas[index].titulo = titulo;
+    preguntas[index].opciones = ops.map((o,i)=>({id:idEditar+"_"+i, texto:o}));
+
+    set(KEY_PREGUNTAS, preguntas);
+
+    document.getElementById("msg").innerHTML = "✔ Pregunta editada correctamente";
+    limpiarFormulario();
+    refrescarTabla();
+    return;
+  }
+
+  // MODO NUEVA PREGUNTA
+  try{
+    registrarPregunta(titulo, ops);
+    document.getElementById("msg").innerHTML = "✔ Pregunta creada correctamente";
+    limpiarFormulario();
+    refrescarTabla();
+  }catch(e){
+    document.getElementById("msg").innerHTML = "❌ " + e;
+  }
+}
+
+function editar(id){
+  let preguntas = get(KEY_PREGUNTAS);
+  let p = preguntas.find(x => x.id == id);
+
+  document.getElementById("edit_id").value = p.id;
+  document.getElementById("titulo").value = p.titulo;
+  document.getElementById("opciones").value = p.opciones.map(o=>o.texto).join("\n");
+
+  document.getElementById("msg").innerHTML = "✏ Editando pregunta…";
+}
+
+function eliminar(id){
+  if(!confirm("¿Eliminar esta pregunta?")) return;
+
+  let preguntas = get(KEY_PREGUNTAS);
+  preguntas = preguntas.filter(p => p.id != id);
+  set(KEY_PREGUNTAS, preguntas);
+
+  refrescarTabla();
+  document.getElementById("msg").innerHTML = "✔ Pregunta eliminada";
+}
+
+function limpiarFormulario(){
+  document.getElementById("edit_id").value = "";
+  document.getElementById("titulo").value = "";
+  document.getElementById("opciones").value = "";
+}
+
+refrescarTabla();
+</script>
+
+</body>
+</html>

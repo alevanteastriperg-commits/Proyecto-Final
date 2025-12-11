@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar Clientes</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header>Registrar Clientes – La Miguelina</header>
+
+<div class="container">
+  <nav>
+    <a href="index.html">Inicio</a>
+  </nav>
+
+  <div class="card">
+    <h3>Registrar cliente participante</h3>
+
+    <input type="hidden" id="editId">
+
+    <label>Email</label>
+    <input id="email">
+
+    <label>Nombre</label>
+    <input id="nombre">
+
+    <label>Apellido</label>
+    <input id="apellido">
+
+    <label>Campo 1 (¿Qué compró?)</label>
+    <input id="c1">
+
+    <label>Campo 2 (¿Con qué frecuencia visita la panadería?)</label>
+    <input id="c2">
+
+    <label>Campo 3 (¿Cómo conoció la panadería?)</label>
+    <input id="c3">
+
+    <button onclick="guardar()">Guardar</button>
+
+    <p id="msg"></p>
+  </div>
+
+  <div class="card">
+    <h3>Clientes Registrados</h3>
+    <table border="1" width="100%" id="tablaClientes">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+
+<script>
+// ================================
+// CARGAR LISTA INICIAL
+// ================================
+function cargarTabla(){
+  let lista = get(KEY_CLIENTES);
+  let tbody = document.querySelector("#tablaClientes tbody");
+  tbody.innerHTML = "";
+
+  lista.forEach((c, index) => {
+    let fila = `
+      <tr>
+        <td>${c.email}</td>
+        <td>${c.nombre}</td>
+        <td>${c.apellido}</td>
+        <td>
+          <button onclick="editar(${index})">✏ Editar</button>
+          <button onclick="eliminar(${index})">🗑 Eliminar</button>
+        </td>
+      </tr>
+    `;
+    tbody.innerHTML += fila;
+  });
+}
+
+cargarTabla();
+
+// ================================
+// GUARDAR O EDITAR CLIENTE
+// ================================
+function guardar(){
+  let email = document.getElementById("email").value.trim();
+  let nombre = document.getElementById("nombre").value.trim();
+  let apellido = document.getElementById("apellido").value.trim();
+  let c1 = document.getElementById("c1").value.trim();
+  let c2 = document.getElementById("c2").value.trim();
+  let c3 = document.getElementById("c3").value.trim();
+
+  let editId = document.getElementById("editId").value;
+  let lista = get(KEY_CLIENTES);
+
+  if(editId){ 
+    // EDITAR
+    lista[editId] = { email, nombre, apellido, c1, c2, c3 };
+    set(KEY_CLIENTES, lista);
+    document.getElementById("msg").innerHTML = "✔ Cliente actualizado correctamente";
+  } else {
+    // AGREGAR NUEVO
+    try{
+      registrarCliente({ email, nombre, apellido, c1, c2, c3 });
+      document.getElementById("msg").innerHTML = "✔ Cliente registrado correctamente";
+    }catch(e){
+      document.getElementById("msg").innerHTML = "❌ " + e;
+      return;
+    }
+  }
+
+  limpiarFormulario();
+  cargarTabla();
+}
+
+// ================================
+// EDITAR CLIENTE
+// ================================
+function editar(index){
+  let lista = get(KEY_CLIENTES);
+  let c = lista[index];
+
+  document.getElementById("editId").value = index;
+  document.getElementById("email").value = c.email;
+  document.getElementById("nombre").value = c.nombre;
+  document.getElementById("apellido").value = c.apellido;
+  document.getElementById("c1").value = c.c1;
+  document.getElementById("c2").value = c.c2;
+  document.getElementById("c3").value = c.c3;
+
+  document.getElementById("msg").innerHTML = "✏ Editando cliente...";
+}
+
+// ================================
+// ELIMINAR CLIENTE
+// ================================
+function eliminar(index){
+  let lista = get(KEY_CLIENTES);
+
+  if(confirm("¿Seguro que deseas eliminar este cliente?")){
+    lista.splice(index, 1);
+    set(KEY_CLIENTES, lista);
+    cargarTabla();
+  }
+}
+
+// ================================
+// LIMPIAR FORMULARIO
+// ================================
+function limpiarFormulario(){
+  document.getElementById("editId").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("nombre").value = "";
+  document.getElementById("apellido").value = "";
+  document.getElementById("c1").value = "";
+  document.getElementById("c2").value = "";
+  document.getElementById("c3").value = "";
+}
+</script>
+
+</body>
+</html>

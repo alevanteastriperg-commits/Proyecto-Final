@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultados – La Miguelina</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header>Resultados de la Encuesta – La Miguelina</header>
+
+<div class="container">
+  <nav><a href="index.html">Inicio</a></nav>
+
+  <div class="card" id="reporte"></div>
+</div>
+
+<script src="app.js"></script>
+<script>
+let data = generarReporte();
+let html = `<h3>Total votos: ${data.totalVotos}</h3>`;
+
+data.detalle.forEach(r=>{
+  html += `<h4>${r.titulo}</h4><table class="table"><tr><th>Opción</th><th>Votos</th></tr>`;
+  r.opciones.forEach(o=>{
+    html += `<tr><td>${o.texto}</td><td>${r.conteo[o.id]}</td></tr>`;
+  });
+  html += "</table>";
+});
+
+document.getElementById("reporte").innerHTML = html;
+</script>
+
+</body>
+</html>
